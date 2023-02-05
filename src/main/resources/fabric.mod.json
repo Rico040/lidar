@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "lidar",
+  "name": "Lidar (Fabric)",
+  "version": "$version",
+  "environment": "client",
+  "icon": "assets/lidar/icon.png",
+  "entrypoints": {
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "me.jfenn.lidar.Lidar"
+      }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "me.jfenn.lidar.LidarClient"
+      }
+    ],
+    "server": [
+      {
+        "adapter": "kotlin",
+        "value": "me.jfenn.lidar.LidarServer"
+      }
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.7.2",
+    "minecraft": ">=1.19-"
+  },
+  "contact": {
+    "homepage": "https://minecraft.horrific.dev/",
+    "sources": "https://gitlab.com/horrific-tweaks/lidar/",
+    "issues": "https://gitlab.com/horrific-tweaks/lidar/issues/"
+  },
+  "authors": [
+    "fennifith"
+  ],
+  "description": "Modifies the Minecraft renderer to display lidar dots of a world",
+  "mixins": [
+    "mixins.lidar.json"
+  ]
+}
