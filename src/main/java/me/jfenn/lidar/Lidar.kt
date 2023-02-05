@@ -14,7 +14,6 @@ val onReload = EventListener<Unit>()
 object Lidar : ModInitializer {
 
     val config: LidarConfig by config()
-    val particles: ParticleService by lazy { ParticleService() }
 
     override fun onInitialize() {
         println("$MOD_ID mod initialized (main)")

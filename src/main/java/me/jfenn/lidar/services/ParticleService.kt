@@ -18,12 +18,10 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.util.registry.Registry
 import java.util.LinkedList
 
-class ParticleService {
+object ParticleService {
 
-    companion object {
-        const val OFFSET_MIN = 0.0
-        const val OFFSET_MAX = 0.99
-    }
+    const val OFFSET_MIN = 0.0
+    const val OFFSET_MAX = 0.99
 
     fun getColor(id: String, map: Map<String, String?>, default: String? = null): Int? {
         val color = if (map.containsKey(id)) map[id] else default
@@ -88,10 +86,6 @@ class ParticleService {
             entityId?.toDouble() ?: Double.MAX_VALUE,
             entityOffsetDouble ?: 0.0
         )
-    }
-
-    fun tick() {
-
     }
 
 }

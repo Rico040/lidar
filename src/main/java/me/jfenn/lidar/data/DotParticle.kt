@@ -1,5 +1,6 @@
 package me.jfenn.lidar.data
 
+import me.jfenn.lidar.Lidar
 import me.jfenn.lidar.MOD_ID
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes
@@ -36,8 +37,8 @@ class DotParticle(
     private val blockPos = BlockPos(x, y, z)
 
     init {
-        // set max age = 1 minute in ticks
-        maxAge = 60 * 20
+        // set max age from config
+        maxAge = MAX_AGE
         // set scale = 0.2
         scale = 0.01f
         // set color based on provided color hex int
@@ -102,6 +103,9 @@ class DotParticle(
     companion object {
         val DOT = FabricParticleTypes.simple()!!
         val ID = Identifier(MOD_ID, "dot")
+        val MAX_AGE by lazy {
+            Lidar.config.lidarDuration
+        }
 
         fun register() = Registry.register(Registry.PARTICLE_TYPE, ID, DOT)
 
