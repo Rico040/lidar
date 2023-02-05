@@ -27,9 +27,9 @@ class DotParticle(
     private val entityId = entityIdTmp.takeIf { entityIdTmp != Double.MAX_VALUE }?.toInt()
     private val entityOffset = entityOffsetTmp.toInt().let {
         Vec3d(
-            (128.0 - (it shr 16 and 0xFF)) / 128.0,
-            (128.0 - (it shr 8 and 0xFF)) / 128.0,
-            (128.0 - (it and 0xFF)) / 128.0,
+            (128.0 - (it shr 16 and 0xFF)) / 32.0,
+            (128.0 - (it shr 8 and 0xFF)) / 32.0,
+            (128.0 - (it and 0xFF)) / 32.0,
         )
     }
 
@@ -50,7 +50,13 @@ class DotParticle(
 
     override fun move(dx: Double, dy: Double, dz: Double) {
         if (entityId != null) {
-            val entity = clientWorld.getEntityById(entityId) ?: return
+            val entity = clientWorld.getEntityById(entityId)
+            if (entity == null || entity.isRemoved) {
+                markDead()
+                return
+            }
+
+            // Calculate a new particle position from the original entityOffset
             val newPos = entity.pos.add(entityOffset);
             x = newPos.x
             y = newPos.y

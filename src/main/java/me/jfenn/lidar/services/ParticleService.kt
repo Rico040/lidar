@@ -4,7 +4,13 @@ import me.jfenn.lidar.Lidar
 import me.jfenn.lidar.data.DotParticle
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.GameRenderer
+import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.client.world.ClientWorld
+import net.minecraft.entity.mob.HostileEntity
+import net.minecraft.entity.mob.PiglinEntity
+import net.minecraft.entity.passive.CowEntity
+import net.minecraft.entity.passive.LlamaEntity
+import net.minecraft.entity.passive.PassiveEntity
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.EntityHitResult
 import net.minecraft.util.hit.HitResult
@@ -49,7 +55,13 @@ class ParticleService {
             is EntityHitResult -> {
                 val entity = hit.entity ?: return
                 val id = Registry.ENTITY_TYPE.getId(entity.type).toString()
-                val color = getColor(id, Lidar.config.entityColorMap, Lidar.config.entityColorDefault) ?: return
+
+                val colorDefault = when (entity) {
+                    is HostileEntity -> Lidar.config.entityColorHostile
+                    is PassiveEntity -> Lidar.config.entityColorPeaceful
+                    else -> Lidar.config.entityColorDefault
+                }
+                val color = getColor(id, Lidar.config.entityColorMap, colorDefault) ?: return
 
                 addParticle(
                     world = world,
@@ -64,9 +76,9 @@ class ParticleService {
 
     fun addParticle(world: ClientWorld, pos: Vec3d, color: Int, entityId: Int? = null, entityOffset: Vec3d? = null) {
         val entityOffsetDouble = entityOffset?.let {
-            (((it.x * 128).toInt().coerceIn(-128, 128) + 128) shl 16)
-                .or(((it.y * 128).toInt().coerceIn(-128, 128) + 128) shl 8)
-                .or((it.z * 128).toInt().coerceIn(-128, 128) + 128)
+            (((it.x * 32).toInt().coerceIn(-128, 128) + 128) shl 16)
+                .or(((it.y * 32).toInt().coerceIn(-128, 128) + 128) shl 8)
+                .or((it.z * 32).toInt().coerceIn(-128, 128) + 128)
         }?.toDouble()
 
         world.addImportantParticle(

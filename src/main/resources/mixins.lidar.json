@@ -7,7 +7,9 @@
   ],
   "client": [
     "BackgroundRendererMixin",
+    "BlockEntityRenderDispatcherMixin",
     "BlockRenderManagerMixin",
+    "EntityRendererMixin",
     "GameRendererMixin",
     "WorldRendererMixin"
   ],
