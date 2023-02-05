@@ -66,6 +66,7 @@ class DotParticle(
             val block = clientWorld.getBlockState(blockPos)
             if (block.isAir) {
                 markDead()
+                return
             }
         }
     }

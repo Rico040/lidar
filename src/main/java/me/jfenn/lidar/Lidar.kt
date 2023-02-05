@@ -13,7 +13,7 @@ val onReload = EventListener<Unit>()
 
 object Lidar : ModInitializer {
 
-    val config: LidarConfig by config()
+    var config: LidarConfig by config()
 
     override fun onInitialize() {
         println("$MOD_ID mod initialized (main)")
