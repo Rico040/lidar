@@ -6,7 +6,9 @@
   "mixins": [
   ],
   "client": [
+    "BackgroundRendererMixin",
     "BlockRenderManagerMixin",
+    "GameRendererMixin",
     "WorldRendererMixin"
   ],
   "injectors": {
