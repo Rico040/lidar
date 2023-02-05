@@ -7,6 +7,7 @@ import net.minecraft.client.particle.*
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.particle.DefaultParticleType
 import net.minecraft.util.Identifier
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
@@ -32,6 +33,8 @@ class DotParticle(
         )
     }
 
+    private val blockPos = BlockPos(x, y, z)
+
     init {
         // set max age = 1 minute in ticks
         maxAge = 60 * 20
@@ -52,6 +55,11 @@ class DotParticle(
             x = newPos.x
             y = newPos.y
             z = newPos.z
+        } else {
+            val block = clientWorld.getBlockState(blockPos)
+            if (block.isAir) {
+                markDead()
+            }
         }
     }
 

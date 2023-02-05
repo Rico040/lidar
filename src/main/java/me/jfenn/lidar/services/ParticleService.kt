@@ -14,6 +14,11 @@ import java.util.LinkedList
 
 class ParticleService {
 
+    companion object {
+        const val OFFSET_MIN = 0.0
+        const val OFFSET_MAX = 0.99
+    }
+
     fun getColor(id: String, map: Map<String, String?>, default: String? = null): Int? {
         val color = if (map.containsKey(id)) map[id] else default
         return color?.removePrefix("#")
@@ -31,7 +36,15 @@ class ParticleService {
                 val id = Registry.BLOCK.getId(blockState.block).toString()
                 val color = getColor(id, Lidar.config.blockColorMap, Lidar.config.blockColorDefault) ?: return
 
-                addParticle(world, hit.pos, color)
+                val offset = hit.pos.subtract(hit.blockPos.x.toDouble(), hit.blockPos.y.toDouble(), hit.blockPos.z.toDouble())
+
+                val pos = Vec3d(
+                    (hit.blockPos.x + offset.x.coerceIn(OFFSET_MIN, OFFSET_MAX)),
+                    (hit.blockPos.y + offset.y.coerceIn(OFFSET_MIN, OFFSET_MAX)),
+                    (hit.blockPos.z + offset.z.coerceIn(OFFSET_MIN, OFFSET_MAX)),
+                )
+
+                addParticle(world, pos, color)
             }
             is EntityHitResult -> {
                 val entity = hit.entity ?: return
