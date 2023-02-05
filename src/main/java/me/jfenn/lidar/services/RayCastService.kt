@@ -36,6 +36,7 @@ object RayCastService {
             for (i in 0..count) {
                 val projection = vec.rotateX((spread * (Math.random() - 0.5)).toFloat())
                     .rotateY((spread * (Math.random() - 0.5)).toFloat())
+                    .rotateZ((spread * (Math.random() - 0.5)).toFloat())
 
                 add(projection)
             }
