@@ -49,6 +49,7 @@ class DotParticle(
             }
 
             // TODO: based on provided entity part id, apply rotations to entityOffset
+            return
 
             // Calculate a new particle position from the original entityOffset
             val newPos = entity.pos.subtract(info.entityOffset);

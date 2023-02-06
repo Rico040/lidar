@@ -1,6 +1,7 @@
 package me.jfenn.lidar
 
 import me.jfenn.lidar.data.DotParticle
+import me.jfenn.lidar.services.EntityModelService
 import me.jfenn.lidar.services.ParticleService
 import me.jfenn.lidar.services.RayCastService
 import net.fabricmc.api.ClientModInitializer
@@ -20,6 +21,8 @@ import net.minecraft.resource.ResourceManager
 import net.minecraft.resource.ResourceType
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
+import net.minecraft.util.hit.BlockHitResult
+import net.minecraft.util.hit.EntityHitResult
 import org.lwjgl.glfw.GLFW
 
 object LidarClient : ClientModInitializer {
@@ -40,16 +43,31 @@ object LidarClient : ClientModInitializer {
             val world = client.world ?: return@StartTick
             val playerPos = client.player?.pos ?: return@StartTick
 
+            val onlyPlayers = true
+
             for (entity in world.entities) {
                 // skip entities outside of render distance
                 if (!entity.shouldRender(playerPos.distanceTo(entity.pos))) continue
                 if (entity !is LivingEntity || entity.isRemoved) continue
+                if (onlyPlayers && !entity.isPlayer) continue
 
                 // TODO: config setting to render only player particles
                 val projections = RayCastService.getEntityProjections(entity, Lidar.config.lidarSpread, Lidar.config.lidarCount)
                 for (projection in projections) {
                     val hit = RayCastService.raycastInDirection(entity, entity.eyePos, projection) ?: continue
-                    ParticleService.addHit(client, hit)
+
+                    if (hit is BlockHitResult) {
+                        ParticleService.addBlockHit(hit)
+                    }
+
+                    if (hit is EntityHitResult) {
+                        // TODO: determine which model part the ray has hit
+                        val pos = EntityModelService.getCollisionPoint(entity, hit.pos, projection) ?: continue
+
+                        // TODO: offset collision point by current animation rotation
+
+                        ParticleService.addEntityHit(hit, pos)
+                    }
                 }
             }
         })

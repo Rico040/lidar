@@ -5,7 +5,10 @@ import me.jfenn.lidar.data.DotParticle
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRenderer
+import net.minecraft.client.render.entity.EntityRenderDispatcher
+import net.minecraft.client.render.entity.EntityRenderer
 import net.minecraft.client.world.ClientWorld
+import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.mob.HostileEntity
 import net.minecraft.entity.mob.PiglinEntity
 import net.minecraft.entity.passive.CowEntity
@@ -29,52 +32,48 @@ object ParticleService {
             ?.toIntOrNull(16)
     }
 
-    fun addHit(client: MinecraftClient, hit: HitResult) {
-        val world = client.world ?: return;
+    fun addBlockHit(hit: BlockHitResult) {
+        val world = MinecraftClient.getInstance().world ?: return
 
-        when (hit) {
-            is BlockHitResult -> {
-                val blockState = world.getBlockState(hit.blockPos) ?: return
-                if (blockState.isAir) return
+        val blockState = world.getBlockState(hit.blockPos) ?: return
+        if (blockState.isAir) return
 
-                val id = Registry.BLOCK.getId(blockState.block).toString()
-                val color = getColor(id, Lidar.config.blockColorMap, Lidar.config.blockColorDefault) ?: return
+        val id = Registry.BLOCK.getId(blockState.block).toString()
+        val color = getColor(id, Lidar.config.blockColorMap, Lidar.config.blockColorDefault) ?: return
 
-                val offset = hit.pos.subtract(hit.blockPos.x.toDouble(), hit.blockPos.y.toDouble(), hit.blockPos.z.toDouble())
+        val offset = hit.pos.subtract(hit.blockPos.x.toDouble(), hit.blockPos.y.toDouble(), hit.blockPos.z.toDouble())
 
-                val pos = Vec3d(
-                    (hit.blockPos.x + offset.x.coerceIn(OFFSET_MIN, OFFSET_MAX)),
-                    (hit.blockPos.y + offset.y.coerceIn(OFFSET_MIN, OFFSET_MAX)),
-                    (hit.blockPos.z + offset.z.coerceIn(OFFSET_MIN, OFFSET_MAX)),
-                )
+        val pos = Vec3d(
+            (hit.blockPos.x + offset.x.coerceIn(OFFSET_MIN, OFFSET_MAX)),
+            (hit.blockPos.y + offset.y.coerceIn(OFFSET_MIN, OFFSET_MAX)),
+            (hit.blockPos.z + offset.z.coerceIn(OFFSET_MIN, OFFSET_MAX)),
+        )
 
-                addParticle(world, pos, DotParticle.Info(color))
-            }
-            is EntityHitResult -> {
-                // TODO: determine which model part the ray has hit
+        addParticle(world, pos, DotParticle.Info(color))
+    }
 
-                val entity = hit.entity ?: return
-                val id = Registry.ENTITY_TYPE.getId(entity.type).toString()
+    fun addEntityHit(hit: EntityHitResult, hitPos: Vec3d) {
+        val world = MinecraftClient.getInstance().world ?: return
+        val entity = hit.entity ?: return
+        val id = Registry.ENTITY_TYPE.getId(entity.type).toString()
 
-                val colorDefault = when (entity) {
-                    is HostileEntity -> Lidar.config.entityColorHostile
-                    is PassiveEntity -> Lidar.config.entityColorPeaceful
-                    else -> Lidar.config.entityColorDefault
-                }
-                val color = getColor(id, Lidar.config.entityColorMap, colorDefault) ?: return
-
-                addParticle(
-                    world = world,
-                    pos = hit.pos,
-                    info = DotParticle.Info(
-                        color = color,
-                        entityId = entity.id,
-                        entityOffset = entity.pos.subtract(hit.pos),
-                        entityPart = 0,
-                    ),
-                )
-            }
+        val colorDefault = when (entity) {
+            is HostileEntity -> Lidar.config.entityColorHostile
+            is PassiveEntity -> Lidar.config.entityColorPeaceful
+            else -> Lidar.config.entityColorDefault
         }
+        val color = getColor(id, Lidar.config.entityColorMap, colorDefault) ?: return
+
+        addParticle(
+            world = world,
+            pos = hitPos,
+            info = DotParticle.Info(
+                color = color,
+                entityId = entity.id,
+                entityOffset = entity.pos.subtract(hit.pos),
+                entityPart = 0,
+            ),
+        )
     }
 
     fun addParticle(world: ClientWorld, pos: Vec3d, info: DotParticle.Info) {
