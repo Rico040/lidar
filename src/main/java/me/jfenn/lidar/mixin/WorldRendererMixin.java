@@ -2,6 +2,7 @@ package me.jfenn.lidar.mixin;
 
 import me.jfenn.lidar.Lidar;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.entity.SheepEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;

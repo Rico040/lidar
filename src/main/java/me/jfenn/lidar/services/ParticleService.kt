@@ -48,9 +48,11 @@ object ParticleService {
                     (hit.blockPos.z + offset.z.coerceIn(OFFSET_MIN, OFFSET_MAX)),
                 )
 
-                addParticle(world, pos, color)
+                addParticle(world, pos, DotParticle.Info(color))
             }
             is EntityHitResult -> {
+                // TODO: determine which model part the ray has hit
+
                 val entity = hit.entity ?: return
                 val id = Registry.ENTITY_TYPE.getId(entity.type).toString()
 
@@ -64,27 +66,24 @@ object ParticleService {
                 addParticle(
                     world = world,
                     pos = hit.pos,
-                    color = color,
-                    entityId = entity.id,
-                    entityOffset = entity.pos.subtract(hit.pos)
+                    info = DotParticle.Info(
+                        color = color,
+                        entityId = entity.id,
+                        entityOffset = entity.pos.subtract(hit.pos),
+                        entityPart = 0,
+                    ),
                 )
             }
         }
     }
 
-    fun addParticle(world: ClientWorld, pos: Vec3d, color: Int, entityId: Int? = null, entityOffset: Vec3d? = null) {
-        val entityOffsetDouble = entityOffset?.let {
-            (((it.x * 32).toInt().coerceIn(-128, 128) + 128) shl 16)
-                .or(((it.y * 32).toInt().coerceIn(-128, 128) + 128) shl 8)
-                .or((it.z * 32).toInt().coerceIn(-128, 128) + 128)
-        }?.toDouble()
+    fun addParticle(world: ClientWorld, pos: Vec3d, info: DotParticle.Info) {
+        val (i, j, k) = info.encode()
 
         world.addImportantParticle(
             DotParticle.DOT,
             pos.x, pos.y, pos.z,
-            color.toDouble(),
-            entityId?.toDouble() ?: Double.MAX_VALUE,
-            entityOffsetDouble ?: 0.0
+            i, j, k,
         )
     }
 

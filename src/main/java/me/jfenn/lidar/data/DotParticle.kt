@@ -24,16 +24,7 @@ class DotParticle(
     entityOffsetTmp: Double,
 ) : AbstractSlowingParticle(clientWorld, x, y, z, 0.0, 0.0, 0.0) {
 
-    private val color = colorTmp.toInt()
-    private val entityId = entityIdTmp.takeIf { entityIdTmp != Double.MAX_VALUE }?.toInt()
-    private val entityOffset = entityOffsetTmp.toInt().let {
-        Vec3d(
-            (128.0 - (it shr 16 and 0xFF)) / 32.0,
-            (128.0 - (it shr 8 and 0xFF)) / 32.0,
-            (128.0 - (it and 0xFF)) / 32.0,
-        )
-    }
-
+    private val info = Info.decode(colorTmp, entityIdTmp, entityOffsetTmp)
     private val blockPos = BlockPos(x, y, z)
 
     init {
@@ -42,23 +33,25 @@ class DotParticle(
         // set scale = 0.2
         scale = 0.01f
         // set color based on provided color hex int
-        red = (color shr 16 and 0xFF) / 255f
-        green = (color shr 8 and 0xFF) / 255f
-        blue = (color and 0xFF) / 255f
+        red = info.red
+        green = info.green
+        blue = info.blue
     }
 
     override fun getType(): ParticleTextureSheet = ParticleTextureSheet.PARTICLE_SHEET_OPAQUE
 
     override fun move(dx: Double, dy: Double, dz: Double) {
-        if (entityId != null) {
-            val entity = clientWorld.getEntityById(entityId)
+        if (info.entityId != null && info.entityOffset != null) {
+            val entity = clientWorld.getEntityById(info.entityId)
             if (entity == null || entity.isRemoved) {
                 markDead()
                 return
             }
 
+            // TODO: based on provided entity part id, apply rotations to entityOffset
+
             // Calculate a new particle position from the original entityOffset
-            val newPos = entity.pos.add(entityOffset);
+            val newPos = entity.pos.subtract(info.entityOffset);
             x = newPos.x
             y = newPos.y
             z = newPos.z
@@ -82,6 +75,64 @@ class DotParticle(
         val j = ((i and 255) + (f * 15.0f * 16.0f).toInt()).coerceAtMost(240)
         val k = i shr 16 and 255
         return j or (k shl 16)
+    }
+
+    class Info(
+        val color: Int,
+        val entityId: Int? = null,
+        val entityPart: Int? = null,
+        val entityOffset: Vec3d? = null,
+    ) {
+
+        val red = (color shr 16 and 0xFF) / 255f
+        val green = (color shr 8 and 0xFF) / 255f
+        val blue = (color and 0xFF) / 255f
+
+        fun encode(): Triple<Double, Double, Double> {
+            return Triple(
+                Double.fromBits(color.toLong()),
+                if (entityId != null && entityPart != null) {
+                    Double.fromBits(
+                        (entityId.toLong() shl 32)
+                            .or(entityPart.toLong())
+                    )
+                } else Double.fromBits(0L),
+                entityOffset?.let{
+                    Double.fromBits(
+                        (((it.x * 32).toLong().coerceIn(-127, 128) + 127) shl 16)
+                            .or(((it.y * 32).toLong().coerceIn(-127, 128) + 127) shl 8)
+                            .or((it.z * 32).toLong().coerceIn(-127, 128) + 127)
+                    )
+                } ?: Double.fromBits(0L),
+            )
+        }
+
+        companion object {
+            fun decode(
+                colorTmp: Double,
+                entityIdTmp: Double,
+                entityOffsetTmp: Double,
+            ): Info {
+                val color = colorTmp.toBits().toInt()
+                val isEntity = entityIdTmp != Double.fromBits(0L)
+                val entityId = entityIdTmp.takeIf { isEntity }?.toBits()?.let {
+                    (it ushr 32 and 0xFFFFFFFF).toInt()
+                }
+                val entityPart = entityIdTmp.takeIf { isEntity }?.toBits()?.let {
+                    (it and 0xFFFFFFFF).toInt()
+                }
+                val entityOffset = entityOffsetTmp.toBits().let {
+                    Vec3d(
+                        ((it ushr 16 and 0xFF) - 127.0) / 32.0,
+                        ((it ushr 8 and 0xFF) - 127.0) / 32.0,
+                        ((it and 0xFF) - 127.0) / 32.0,
+                    )
+                }
+
+                return Info(color, entityId, entityPart, entityOffset)
+            }
+        }
+
     }
 
     class Factory(private val spriteProvider: SpriteProvider) : ParticleFactory<DefaultParticleType?> {
