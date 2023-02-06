@@ -43,7 +43,7 @@ object LidarClient : ClientModInitializer {
             val world = client.world ?: return@StartTick
             val playerPos = client.player?.pos ?: return@StartTick
 
-            val onlyPlayers = true
+            val onlyPlayers = false
 
             for (entity in world.entities) {
                 // skip entities outside of render distance
@@ -54,19 +54,14 @@ object LidarClient : ClientModInitializer {
                 // TODO: config setting to render only player particles
                 val projections = RayCastService.getEntityProjections(entity, Lidar.config.lidarSpread, Lidar.config.lidarCount)
                 for (projection in projections) {
-                    val hit = RayCastService.raycastInDirection(entity, entity.eyePos, projection) ?: continue
+                    val (blockHit, entityHit) = RayCastService.raycastInDirection(entity, entity.eyePos, projection)
 
-                    if (hit is BlockHitResult) {
+                    entityHit?.let { hit ->
+                        EntityModelService.getCollisionPoint(hit.entity, hit.pos, projection)
+                    }?.also { pos ->
+                        ParticleService.addEntityHit(entityHit, pos)
+                    } ?: blockHit?.let { hit ->
                         ParticleService.addBlockHit(hit)
-                    }
-
-                    if (hit is EntityHitResult) {
-                        // TODO: determine which model part the ray has hit
-                        val pos = EntityModelService.getCollisionPoint(entity, hit.pos, projection) ?: continue
-
-                        // TODO: offset collision point by current animation rotation
-
-                        ParticleService.addEntityHit(hit, pos)
                     }
                 }
             }

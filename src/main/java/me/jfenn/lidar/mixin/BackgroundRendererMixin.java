@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BackgroundRenderer.class)
-public class BackgroundRendererMixin {
+public abstract class BackgroundRendererMixin {
 
     @Shadow
     private static float red;

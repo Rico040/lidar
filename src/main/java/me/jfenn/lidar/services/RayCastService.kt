@@ -5,6 +5,8 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.decoration.ItemFrameEntity
 import net.minecraft.entity.projectile.ProjectileUtil
+import net.minecraft.util.hit.BlockHitResult
+import net.minecraft.util.hit.EntityHitResult
 import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
@@ -15,19 +17,6 @@ import kotlin.math.sin
 
 
 object RayCastService {
-
-    private fun pitchYawToVec3d(pitchDeg: Double, yawDeg: Double): Vec3d {
-        val pitch = Math.toRadians(pitchDeg)
-        val yaw = Math.toRadians(yawDeg)
-        val xzLen = cos(pitch)
-        val x = xzLen * cos(yaw)
-        val y = sin(pitch)
-        val z = xzLen * sin(-yaw)
-        return Vec3d(x, y, z)
-    }
-
-    fun getEntityFacingVector(entity: LivingEntity)
-        = entity.getRotationVec(0.0f)
 
     fun getEntityProjections(entity: LivingEntity, spreadDeg: Float, count: Int): List<Vec3d> {
         val spread = Math.toRadians(spreadDeg.toDouble())
@@ -43,7 +32,7 @@ object RayCastService {
         }
     }
 
-    fun raycastInDirection(entity: LivingEntity, orig: Vec3d, direction: Vec3d): HitResult? {
+    fun raycastInDirection(entity: LivingEntity, orig: Vec3d, direction: Vec3d): Pair<BlockHitResult?, EntityHitResult?> {
         val reachDistance = Lidar.config.lidarDistance
 
         // raycast to find a visual block intersection
@@ -68,14 +57,14 @@ object RayCastService {
             box,
             { entityx: Entity -> !entityx.isSpectator && entityx.collides() },
             blockDistanceSq
-        ) ?: return blockHitResult
+        )
 
         // if entity hit is closer than block, return the entity
-        if (entityHitResult.pos.squaredDistanceTo(orig) <= blockDistanceSq) {
-            return entityHitResult
+        if (entityHitResult != null && entityHitResult.pos.squaredDistanceTo(orig) <= blockDistanceSq) {
+            return Pair(blockHitResult, entityHitResult)
         }
 
-        return blockHitResult
+        return Pair(blockHitResult, null)
     }
 
 }
