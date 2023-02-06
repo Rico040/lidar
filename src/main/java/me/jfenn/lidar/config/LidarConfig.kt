@@ -11,18 +11,18 @@ data class LidarConfig(
 
     // map of block id -> particle color code
     val blockColorMap: Map<String, String?> = mapOf(
-        "minecraft:air" to null,
+        "default" to "#FFFFFF",
         "minecraft:water" to "#0000FF",
+        "minecraft:seagrass" to "#0000FF",
+        "minecraft:kelp_plant" to "#0000FF",
         "minecraft:lava" to "#ff601c",
     ),
 
-    // default entity color, if not specified in entityColorMap
-    val entityColorDefault: String = "#ff7e7e",
-    val entityColorPeaceful: String = "#61cf66",
-    val entityColorHostile: String = "#ff7e7e",
-
     // map of entity id -> particle color code
     val entityColorMap: Map<String, String?> = mapOf(
+        "default" to "#ff7e7e",
+        "peaceful" to "#61cf66",
+        "hostile" to "#ff7e7e",
         "minecraft:enderman" to "#7e009e",
         "minecraft:creeper" to "#008f07",
     ),

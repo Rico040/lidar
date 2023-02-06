@@ -5,15 +5,10 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.render.WorldRenderer
 import net.minecraft.client.render.entity.LivingEntityRenderer
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.Entity
-import net.minecraft.entity.LivingEntity
-import net.minecraft.util.math.Matrix4f
 import net.minecraft.util.math.Vec3d
-import net.minecraft.util.math.Vector4f
-import java.lang.reflect.Field
 
 object EntityModelService {
 

@@ -47,9 +47,20 @@ object LidarClient : ClientModInitializer {
 
             for (entity in world.entities) {
                 // skip entities outside of render distance
-                if (!entity.shouldRender(playerPos.distanceTo(entity.pos))) continue
                 if (entity !is LivingEntity || entity.isRemoved) continue
                 if (onlyPlayers && !entity.isPlayer) continue
+                if (!entity.shouldRender(playerPos.distanceTo(entity.pos))) continue
+
+                // if the entity is in a block, only render one particle instead of casting projection
+                // (saves particle limit against fish/etc)
+                if (entity.isSubmergedInWater || entity.isInsideWall) {
+                    val color = world.getBlockState(entity.blockPos)?.let {
+                        ParticleService.getBlockColor(it)
+                    } ?: continue
+
+                    ParticleService.addParticle(world, entity.eyePos, DotParticle.Info(color))
+                    continue
+                }
 
                 // TODO: config setting to render only player particles
                 val projections = RayCastService.getEntityProjections(entity, Lidar.config.lidarSpread, Lidar.config.lidarCount)

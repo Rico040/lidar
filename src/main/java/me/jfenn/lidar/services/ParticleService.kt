@@ -2,44 +2,42 @@ package me.jfenn.lidar.services
 
 import me.jfenn.lidar.Lidar
 import me.jfenn.lidar.data.DotParticle
+import net.minecraft.block.BlockState
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.render.GameRenderer
-import net.minecraft.client.render.block.entity.BlockEntityRenderer
-import net.minecraft.client.render.entity.EntityRenderDispatcher
-import net.minecraft.client.render.entity.EntityRenderer
 import net.minecraft.client.world.ClientWorld
-import net.minecraft.entity.LivingEntity
+import net.minecraft.entity.Entity
 import net.minecraft.entity.mob.HostileEntity
-import net.minecraft.entity.mob.PiglinEntity
-import net.minecraft.entity.passive.CowEntity
-import net.minecraft.entity.passive.LlamaEntity
 import net.minecraft.entity.passive.PassiveEntity
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.EntityHitResult
-import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.registry.Registry
-import java.util.LinkedList
 
 object ParticleService {
 
-    const val OFFSET_MIN = 0.0
-    const val OFFSET_MAX = 0.99
+    private const val OFFSET_MIN = 0.0
+    private const val OFFSET_MAX = 0.99
 
-    fun getColor(id: String, map: Map<String, String?>, default: String? = null): Int? {
-        val color = if (map.containsKey(id)) map[id] else default
-        return color?.removePrefix("#")
-            ?.toIntOrNull(16)
+    private fun String.parseColor(): Int? {
+        return removePrefix("#").toIntOrNull(16)
+    }
+
+    fun getBlockColor(blockState: BlockState): Int? {
+        if (blockState.isAir) return null
+
+        val id = Registry.BLOCK.getId(blockState.block).toString()
+        val colorString = Lidar.config.blockColorMap.let {
+            it[id] ?: it["default"]
+        }
+
+        return colorString?.parseColor()
     }
 
     fun addBlockHit(hit: BlockHitResult) {
         val world = MinecraftClient.getInstance().world ?: return
 
         val blockState = world.getBlockState(hit.blockPos) ?: return
-        if (blockState.isAir) return
-
-        val id = Registry.BLOCK.getId(blockState.block).toString()
-        val color = getColor(id, Lidar.config.blockColorMap, Lidar.config.blockColorDefault) ?: return
+        val color = getBlockColor(blockState) ?: return
 
         val offset = hit.pos.subtract(hit.blockPos.x.toDouble(), hit.blockPos.y.toDouble(), hit.blockPos.z.toDouble())
 
@@ -52,17 +50,24 @@ object ParticleService {
         addParticle(world, pos, DotParticle.Info(color))
     }
 
+    fun getEntityColor(entity: Entity): Int? {
+        val id = Registry.ENTITY_TYPE.getId(entity.type).toString()
+        val type = when (entity) {
+            is HostileEntity -> "hostile"
+            is PassiveEntity -> "passive"
+            else -> "neutral"
+        }
+        val colorString = Lidar.config.entityColorMap.let {
+            it[id] ?: it[type] ?: it["default"]
+        }
+
+        return colorString?.parseColor()
+    }
+
     fun addEntityHit(hit: EntityHitResult, hitPos: Vec3d) {
         val world = MinecraftClient.getInstance().world ?: return
         val entity = hit.entity ?: return
-        val id = Registry.ENTITY_TYPE.getId(entity.type).toString()
-
-        val colorDefault = when (entity) {
-            is HostileEntity -> Lidar.config.entityColorHostile
-            is PassiveEntity -> Lidar.config.entityColorPeaceful
-            else -> Lidar.config.entityColorDefault
-        }
-        val color = getColor(id, Lidar.config.entityColorMap, colorDefault) ?: return
+        val color = getEntityColor(hit.entity) ?: return
 
         addParticle(
             world = world,
@@ -70,8 +75,6 @@ object ParticleService {
             info = DotParticle.Info(
                 color = color,
                 entityId = entity.id,
-                entityOffset = entity.pos.subtract(hit.pos),
-                entityPart = 0,
             ),
         )
     }

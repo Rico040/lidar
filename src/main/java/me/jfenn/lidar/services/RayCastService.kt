@@ -3,17 +3,12 @@ package me.jfenn.lidar.services
 import me.jfenn.lidar.Lidar
 import net.minecraft.entity.Entity
 import net.minecraft.entity.LivingEntity
-import net.minecraft.entity.decoration.ItemFrameEntity
 import net.minecraft.entity.projectile.ProjectileUtil
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.EntityHitResult
-import net.minecraft.util.hit.HitResult
-import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.RaycastContext
-import kotlin.math.cos
 import kotlin.math.pow
-import kotlin.math.sin
 
 
 object RayCastService {
