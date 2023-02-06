@@ -15,7 +15,7 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.util.registry.Registry
 
 class DotParticle(
-    val clientWorld: ClientWorld,
+    private val clientWorld: ClientWorld,
     x: Double,
     y: Double,
     z: Double,
@@ -41,21 +41,9 @@ class DotParticle(
     override fun getType(): ParticleTextureSheet = ParticleTextureSheet.PARTICLE_SHEET_OPAQUE
 
     override fun move(dx: Double, dy: Double, dz: Double) {
-        if (info.entityId != null && info.entityOffset != null) {
-            val entity = clientWorld.getEntityById(info.entityId)
-            if (entity == null || entity.isRemoved) {
-                markDead()
-                return
-            }
-
-            // TODO: based on provided entity part id, apply rotations to entityOffset
+        if (info.entityId != null) {
+            // Don't add any behavior for entity IDs
             return
-
-            // Calculate a new particle position from the original entityOffset
-            val newPos = entity.pos.subtract(info.entityOffset);
-            x = newPos.x
-            y = newPos.y
-            z = newPos.z
         } else {
             val block = clientWorld.getBlockState(blockPos)
             if (block.isAir) {
@@ -81,8 +69,6 @@ class DotParticle(
     class Info(
         val color: Int,
         val entityId: Int? = null,
-        val entityPart: Int? = null,
-        val entityOffset: Vec3d? = null,
     ) {
 
         val red = (color shr 16 and 0xFF) / 255f
@@ -92,19 +78,12 @@ class DotParticle(
         fun encode(): Triple<Double, Double, Double> {
             return Triple(
                 Double.fromBits(color.toLong()),
-                if (entityId != null && entityPart != null) {
+                if (entityId != null) {
                     Double.fromBits(
                         (entityId.toLong() shl 32)
-                            .or(entityPart.toLong())
                     )
                 } else Double.fromBits(0L),
-                entityOffset?.let{
-                    Double.fromBits(
-                        (((it.x * 32).toLong().coerceIn(-127, 128) + 127) shl 16)
-                            .or(((it.y * 32).toLong().coerceIn(-127, 128) + 127) shl 8)
-                            .or((it.z * 32).toLong().coerceIn(-127, 128) + 127)
-                    )
-                } ?: Double.fromBits(0L),
+                Double.fromBits(0L),
             )
         }
 
@@ -119,18 +98,8 @@ class DotParticle(
                 val entityId = entityIdTmp.takeIf { isEntity }?.toBits()?.let {
                     (it ushr 32 and 0xFFFFFFFF).toInt()
                 }
-                val entityPart = entityIdTmp.takeIf { isEntity }?.toBits()?.let {
-                    (it and 0xFFFFFFFF).toInt()
-                }
-                val entityOffset = entityOffsetTmp.toBits().let {
-                    Vec3d(
-                        ((it ushr 16 and 0xFF) - 127.0) / 32.0,
-                        ((it ushr 8 and 0xFF) - 127.0) / 32.0,
-                        ((it and 0xFF) - 127.0) / 32.0,
-                    )
-                }
 
-                return Info(color, entityId, entityPart, entityOffset)
+                return Info(color, entityId)
             }
         }
 
