@@ -48,9 +48,6 @@ object EntityModelService {
 
     fun getCollisionPoint(entity: Entity, origin: Vec3d, direction: Vec3d): Vec3d? {
         val dispatcher = MinecraftClient.getInstance().entityRenderDispatcher ?: return null
-        val renderer = MinecraftClient.getInstance().entityRenderDispatcher.getRenderer(entity) ?: return null
-        if (renderer !is LivingEntityRenderer<*, *>) return null
-
         var hit: Vec3d? = null
 
         dispatcher.render(entity, entity.x, entity.y, entity.z, entity.yaw, 0f, MatrixStack(), TriInterceptorProvider { rect ->

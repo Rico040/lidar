@@ -1,11 +1,13 @@
 package me.jfenn.lidar.services
 
-import me.jfenn.lidar.Lidar
+import me.jfenn.lidar.Lidar.config
+import net.minecraft.block.Material
+import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.Entity
-import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.projectile.ProjectileUtil
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.EntityHitResult
+import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.RaycastContext
 import kotlin.math.pow
@@ -13,7 +15,7 @@ import kotlin.math.pow
 
 object RayCastService {
 
-    fun getEntityProjections(entity: LivingEntity, spreadDeg: Float, count: Int): List<Vec3d> {
+    fun getEntityProjections(entity: Entity, spreadDeg: Float, count: Int): List<Vec3d> {
         val spread = Math.toRadians(spreadDeg.toDouble())
         val vec = entity.getRotationVec(0f)
         return buildList(count) {
@@ -27,15 +29,15 @@ object RayCastService {
         }
     }
 
-    fun raycastInDirection(entity: LivingEntity, orig: Vec3d, direction: Vec3d): Pair<BlockHitResult?, EntityHitResult?> {
-        val reachDistance = Lidar.config.lidarDistance
+    fun raycastInDirection(entity: Entity, orig: Vec3d, direction: Vec3d): Pair<BlockHitResult?, EntityHitResult?> {
+        val reachDistance = config.lidarDistance
 
         // raycast to find a visual block intersection
         val blockHitResult = entity.world?.raycast(RaycastContext(
             orig,
             orig.add(direction.multiply(reachDistance)),
             RaycastContext.ShapeType.VISUAL,
-            RaycastContext.FluidHandling.ANY,
+            if (entity.isSubmergedInWater) RaycastContext.FluidHandling.NONE else RaycastContext.FluidHandling.ANY,
             entity,
         ))
         val blockDistanceSq = blockHitResult?.pos?.squaredDistanceTo(orig) ?: reachDistance.pow(2)

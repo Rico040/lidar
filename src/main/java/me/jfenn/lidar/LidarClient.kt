@@ -1,5 +1,6 @@
 package me.jfenn.lidar
 
+import me.jfenn.lidar.Lidar.config
 import me.jfenn.lidar.data.DotParticle
 import me.jfenn.lidar.services.EntityModelService
 import me.jfenn.lidar.services.ParticleService
@@ -10,19 +11,16 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.option.KeyBinding
-import net.minecraft.client.toast.Toast
-import net.minecraft.client.toast.ToastManager
 import net.minecraft.client.util.InputUtil
-import net.minecraft.client.util.math.MatrixStack
+import net.minecraft.entity.Entity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.resource.ResourceManager
 import net.minecraft.resource.ResourceType
-import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.EntityHitResult
+import net.minecraft.util.math.Vec3d
 import org.lwjgl.glfw.GLFW
 
 object LidarClient : ClientModInitializer {
@@ -38,7 +36,7 @@ object LidarClient : ClientModInitializer {
         })
 
         ClientTickEvents.START_CLIENT_TICK.register(ClientTickEvents.StartTick { client ->
-            if (!Lidar.config.isActive) return@StartTick
+            if (!config.isActive) return@StartTick
             if (client.isPaused) return@StartTick
             val world = client.world ?: return@StartTick
             val playerPos = client.player?.pos ?: return@StartTick
@@ -48,12 +46,12 @@ object LidarClient : ClientModInitializer {
             for (entity in world.entities) {
                 // skip entities outside of render distance
                 if (entity !is LivingEntity || entity.isRemoved) continue
-                if (onlyPlayers && !entity.isPlayer) continue
+                if (!config.entityParticles && !entity.isPlayer) continue
                 if (!entity.shouldRender(playerPos.distanceTo(entity.pos))) continue
 
                 // if the entity is in a block, only render one particle instead of casting projection
                 // (saves particle limit against fish/etc)
-                if (entity.isSubmergedInWater || entity.isInsideWall) {
+                if ((!entity.isPlayer && entity.isSubmergedInWater) || entity.isInsideWall) {
                     val color = world.getBlockState(entity.blockPos)?.let {
                         ParticleService.getBlockColor(it)
                     } ?: continue
@@ -62,13 +60,12 @@ object LidarClient : ClientModInitializer {
                     continue
                 }
 
-                // TODO: config setting to render only player particles
-                val projections = RayCastService.getEntityProjections(entity, Lidar.config.lidarSpread, Lidar.config.lidarCount)
+                val projections = RayCastService.getEntityProjections(entity, config.lidarSpread, config.lidarCount)
                 for (projection in projections) {
                     val (blockHit, entityHit) = RayCastService.raycastInDirection(entity, entity.eyePos, projection)
 
                     // if entityHit is the current player, don't render the particle
-                    if (!Lidar.config.entityParticlesOnSelf && entityHit?.entity?.id == client.player?.id)
+                    if (!config.entityParticlesOnSelf && entityHit?.entity?.id == client.player?.id)
                         continue
 
                     entityHit?.let { hit ->
@@ -82,6 +79,10 @@ object LidarClient : ClientModInitializer {
             }
         })
 
+        // TODO: on block update, invalidate particles at block
+
+        // TODO: raycast behind water, ignoring fluids
+
         DotParticle.registerClient()
 
         // when "active" key pressed, toggle isActive config
@@ -93,12 +94,11 @@ object LidarClient : ClientModInitializer {
         ))
 
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick {
-            var isActive = Lidar.config.isActive
+            var isActive = config.isActive
             while (keyActive.wasPressed()) isActive = !isActive
 
-            if (isActive != Lidar.config.isActive) {
-                Lidar.config = Lidar.config.copy(isActive = isActive)
-                it.reloadResources()
+            if (isActive != config.isActive) {
+                config = config.copy(isActive = isActive)
             }
         })
     }

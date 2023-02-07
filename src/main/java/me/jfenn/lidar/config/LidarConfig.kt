@@ -37,6 +37,8 @@ data class LidarConfig(
     val entityParticleFollowModel: Boolean = false,
     // if enabled, particles from other entities will render on the current player
     val entityParticlesOnSelf: Boolean = false,
+    // if enabled, any living entity also renders particles cast from its line of sight
+    val entityParticles: Boolean = true,
 
     // block distance of raycast performed to project lidar particles
     val lidarDistance: Double = 10.0,

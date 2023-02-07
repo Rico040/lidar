@@ -1,6 +1,5 @@
 package me.jfenn.lidar.data
 
-import me.jfenn.lidar.Lidar
 import me.jfenn.lidar.Lidar.config
 import me.jfenn.lidar.MOD_ID
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
@@ -26,6 +25,12 @@ class DotParticle(
     private val info = Info.decode(colorTmp, entityIdTmp, entityOffsetTmp)
     private val blockPos = BlockPos(x, y, z)
 
+    private val blockIdentity = run {
+        world.getBlockState(blockPos)
+    }.let {
+        System.identityHashCode(it)
+    }
+
     init {
         // set max age from config
         maxAge = if (info.entityId != null) config.lidarDurationEntity else config.lidarDurationBlock
@@ -44,10 +49,11 @@ class DotParticle(
             // if the particle is a block, don't do any transforms...
             val block = world.getBlockState(blockPos)
             if (block.isAir) markDead()
+            if (System.identityHashCode(block) != blockIdentity) markDead()
             return
         }
 
-        if (!Lidar.config.entityParticleFollow) {
+        if (!config.entityParticleFollow) {
             // Don't add any behavior for entity IDs
             return
         }
