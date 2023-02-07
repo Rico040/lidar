@@ -25,6 +25,12 @@ data class LidarConfig(
         "minecraft:creeper" to "#008f07",
     ),
 
+    // set of entities that should render normally, ignoring the render mixin
+    val entityRender: Set<String> = setOf(
+        "minecraft:item",
+        "minecraft:ender_dragon",
+    ),
+
     // whether particles should follow entities as they move
     val entityParticleFollow: Boolean = false,
     // if enabled, particles follow entity models more accurately, at the cost of performance
