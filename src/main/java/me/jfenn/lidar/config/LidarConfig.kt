@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LidarConfig(
-    override val schemaVersion: Int = 1,
+    override val schemaVersion: Int = 2,
     val isActive: Boolean = true,
 
     // map of block id -> particle color code
@@ -28,6 +28,8 @@ data class LidarConfig(
     // set of entities that should render normally, ignoring the render mixin
     val entityRender: Set<String> = setOf(
         "minecraft:item",
+        "minecraft:item_frame",
+        "minecraft:glow_item_frame",
         "minecraft:ender_dragon",
     ),
 

@@ -10,17 +10,13 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener
-import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.util.InputUtil
-import net.minecraft.entity.Entity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.resource.ResourceManager
 import net.minecraft.resource.ResourceType
 import net.minecraft.util.Identifier
-import net.minecraft.util.hit.BlockHitResult
-import net.minecraft.util.hit.EntityHitResult
-import net.minecraft.util.math.Vec3d
+import net.minecraft.util.registry.Registry
 import org.lwjgl.glfw.GLFW
 
 object LidarClient : ClientModInitializer {
@@ -41,13 +37,15 @@ object LidarClient : ClientModInitializer {
             val world = client.world ?: return@StartTick
             val playerPos = client.player?.pos ?: return@StartTick
 
-            val onlyPlayers = false
-
             for (entity in world.entities) {
                 // skip entities outside of render distance
                 if (entity !is LivingEntity || entity.isRemoved) continue
                 if (!config.entityParticles && !entity.isPlayer) continue
                 if (!entity.shouldRender(playerPos.distanceTo(entity.pos))) continue
+
+                // don't attempt collisions on excluded entity types
+                val entityType = Registry.ENTITY_TYPE.getId(entity.type).toString()
+                if (config.entityRender.contains(entityType)) continue
 
                 // if the entity is in a block, only render one particle instead of casting projection
                 // (saves particle limit against fish/etc)
@@ -68,7 +66,11 @@ object LidarClient : ClientModInitializer {
                     if (!config.entityParticlesOnSelf && entityHit?.entity?.id == client.player?.id)
                         continue
 
-                    entityHit?.let { hit ->
+                    entityHit?.takeIf {
+                        // don't attempt raycasts on excluded entity types
+                        val entityHitType = Registry.ENTITY_TYPE.getId(it.entity.type).toString()
+                        !config.entityRender.contains(entityHitType)
+                    }?.let { hit ->
                         EntityModelService.getCollisionPoint(hit.entity, hit.pos, projection)
                     }?.also { pos ->
                         ParticleService.addEntityHit(entityHit, pos)
@@ -78,10 +80,6 @@ object LidarClient : ClientModInitializer {
                 }
             }
         })
-
-        // TODO: on block update, invalidate particles at block
-
-        // TODO: raycast behind water, ignoring fluids
 
         DotParticle.registerClient()
 

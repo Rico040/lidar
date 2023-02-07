@@ -5,9 +5,10 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.render.entity.LivingEntityRenderer
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.Entity
+import net.minecraft.entity.boss.dragon.EnderDragonEntity
+import net.minecraft.entity.boss.dragon.EnderDragonPart
 import net.minecraft.util.math.Vec3d
 
 object EntityModelService {
