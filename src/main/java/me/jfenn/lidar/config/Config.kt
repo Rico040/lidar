@@ -16,6 +16,10 @@ import kotlin.reflect.KProperty
 
 abstract class Config<S: Any> {
 
+    abstract val schemaVersion: Int
+
+    val schema: Int = 0
+
     @Transient
     val onChange = EventListener<S>()
 
@@ -26,12 +30,17 @@ abstract class Config<S: Any> {
 
         @OptIn(InternalSerializationApi::class)
         fun <T: Config<T>> read(clazz: KClass<T>) : T {
-            return try {
+            val config: T = try {
                 json.decodeFromStream(clazz.serializer(), Files.newInputStream(path(clazz)))
             } catch (e: Exception) {
                 e.printStackTrace()
                 json.decodeFromString(clazz.serializer(), "{}").also { write(clazz, it) }
             }
+
+            // if the schema doesn't match, overwrite with new config
+            return if (config.schema != config.schemaVersion)
+                json.decodeFromString(clazz.serializer(), "{}").also { write(clazz, it) }
+            else config
         }
 
         @OptIn(InternalSerializationApi::class)

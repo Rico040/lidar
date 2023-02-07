@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LidarConfig(
+    override val schemaVersion: Int = 1,
     val isActive: Boolean = true,
 
     // map of block id -> particle color code
