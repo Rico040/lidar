@@ -67,6 +67,10 @@ object LidarClient : ClientModInitializer {
                 for (projection in projections) {
                     val (blockHit, entityHit) = RayCastService.raycastInDirection(entity, entity.eyePos, projection)
 
+                    // if entityHit is the current player, don't render the particle
+                    if (!Lidar.config.entityParticlesOnSelf && entityHit?.entity?.id == client.player?.id)
+                        continue
+
                     entityHit?.let { hit ->
                         EntityModelService.getCollisionPoint(hit.entity, hit.pos, projection)
                     }?.also { pos ->

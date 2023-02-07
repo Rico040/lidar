@@ -1,6 +1,7 @@
 package me.jfenn.lidar.data
 
 import me.jfenn.lidar.Lidar
+import me.jfenn.lidar.Lidar.config
 import me.jfenn.lidar.MOD_ID
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes
@@ -9,13 +10,11 @@ import net.minecraft.client.world.ClientWorld
 import net.minecraft.particle.DefaultParticleType
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.registry.Registry
 
 class DotParticle(
-    private val clientWorld: ClientWorld,
+    clientWorld: ClientWorld,
     x: Double,
     y: Double,
     z: Double,
@@ -29,7 +28,7 @@ class DotParticle(
 
     init {
         // set max age from config
-        maxAge = MAX_AGE
+        maxAge = if (info.entityId != null) config.lidarDurationEntity else config.lidarDurationBlock
         // set scale = 0.2
         scale = 0.01f
         // set color based on provided color hex int
@@ -41,15 +40,33 @@ class DotParticle(
     override fun getType(): ParticleTextureSheet = ParticleTextureSheet.PARTICLE_SHEET_OPAQUE
 
     override fun move(dx: Double, dy: Double, dz: Double) {
-        if (info.entityId != null) {
+        if (info.entityId == null) {
+            // if the particle is a block, don't do any transforms...
+            val block = world.getBlockState(blockPos)
+            if (block.isAir) markDead()
+            return
+        }
+
+        if (!Lidar.config.entityParticleFollow) {
             // Don't add any behavior for entity IDs
             return
-        } else {
-            val block = clientWorld.getBlockState(blockPos)
-            if (block.isAir) {
-                markDead()
-                return
-            }
+        }
+
+        val entity = world.getEntityById(info.entityId)
+        if (entity == null || entity.isRemoved) {
+            // entity has been killed, or is out of view
+            markDead()
+            return
+        }
+
+        // Calculate a new particle position from the original entityOffset
+        if (info.entityOffset != null) {
+            val newPos = info.entityOffset.rotateY(entity.bodyYaw)
+                .add(entity.pos)
+
+            x = newPos.x
+            y = newPos.y
+            z = newPos.z
         }
     }
 
@@ -69,6 +86,7 @@ class DotParticle(
     class Info(
         val color: Int,
         val entityId: Int? = null,
+        val entityOffset: Vec3d? = null,
     ) {
 
         val red = (color shr 16 and 0xFF) / 255f
@@ -83,11 +101,32 @@ class DotParticle(
                         (entityId.toLong() shl 32)
                     )
                 } else Double.fromBits(0L),
-                Double.fromBits(0L),
+                entityOffset?.let {
+                    Double.fromBits(it.toBits())
+                } ?: Double.fromBits(0L),
             )
         }
 
         companion object {
+
+            private const val VEC3D_SCALE = 128.0
+            private const val VEC3D_MIN = -4096L
+            private const val VEC3D_MAX = 4096L
+
+            private fun Vec3d.toBits(): Long {
+                return (((x * VEC3D_SCALE).toLong().coerceIn(VEC3D_MIN, VEC3D_MAX) - VEC3D_MIN) shl 42)
+                    .or(((y * VEC3D_SCALE).toLong().coerceIn(VEC3D_MIN, VEC3D_MAX) - VEC3D_MIN) shl 21)
+                    .or((z * VEC3D_SCALE).toLong().coerceIn(VEC3D_MIN, VEC3D_MAX) - VEC3D_MIN)
+            }
+
+            private fun vec3dFromBits(bits: Long): Vec3d {
+                return Vec3d(
+                    ((bits ushr 42 and 0xFFFF) + VEC3D_MIN) / VEC3D_SCALE,
+                    ((bits ushr 21 and 0xFFFF) + VEC3D_MIN) / VEC3D_SCALE,
+                    ((bits and 0xFFFF) + VEC3D_MIN) / VEC3D_SCALE,
+                )
+            }
+
             fun decode(
                 colorTmp: Double,
                 entityIdTmp: Double,
@@ -98,8 +137,11 @@ class DotParticle(
                 val entityId = entityIdTmp.takeIf { isEntity }?.toBits()?.let {
                     (it ushr 32 and 0xFFFFFFFF).toInt()
                 }
+                val entityOffset = entityOffsetTmp.takeIf { isEntity }?.toBits()?.let {
+                    vec3dFromBits(it)
+                }
 
-                return Info(color, entityId)
+                return Info(color, entityId, entityOffset)
             }
         }
 
@@ -125,9 +167,6 @@ class DotParticle(
     companion object {
         val DOT = FabricParticleTypes.simple()!!
         val ID = Identifier(MOD_ID, "dot")
-        val MAX_AGE by lazy {
-            Lidar.config.lidarDuration
-        }
 
         fun register() = Registry.register(Registry.PARTICLE_TYPE, ID, DOT)
 

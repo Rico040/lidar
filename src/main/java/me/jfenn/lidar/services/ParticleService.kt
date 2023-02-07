@@ -69,12 +69,16 @@ object ParticleService {
         val entity = hit.entity ?: return
         val color = getEntityColor(hit.entity) ?: return
 
+        val offset = hitPos.subtract(entity.pos)
+            .rotateY(-entity.bodyYaw)
+
         addParticle(
             world = world,
             pos = hitPos,
             info = DotParticle.Info(
                 color = color,
                 entityId = entity.id,
+                entityOffset = offset,
             ),
         )
     }

@@ -6,4 +6,5 @@ val json = Json {
     ignoreUnknownKeys = true
     isLenient = true
     encodeDefaults = true
+    prettyPrint = true
 }

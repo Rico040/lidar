@@ -6,9 +6,6 @@ import kotlinx.serialization.Serializable
 data class LidarConfig(
     val isActive: Boolean = true,
 
-    // default block color, if not specified in blockColorMap
-    val blockColorDefault: String = "#FFFFFF",
-
     // map of block id -> particle color code
     val blockColorMap: Map<String, String?> = mapOf(
         "default" to "#FFFFFF",
@@ -27,6 +24,13 @@ data class LidarConfig(
         "minecraft:creeper" to "#008f07",
     ),
 
+    // whether particles should follow entities as they move
+    val entityParticleFollow: Boolean = false,
+    // if enabled, particles follow entity models more accurately, at the cost of performance
+    val entityParticleFollowModel: Boolean = false,
+    // if enabled, particles from other entities will render on the current player
+    val entityParticlesOnSelf: Boolean = false,
+
     // block distance of raycast performed to project lidar particles
     val lidarDistance: Double = 10.0,
     // degrees/radius random spread of raycast projections
@@ -34,5 +38,7 @@ data class LidarConfig(
     // amount of lidar projections created per entity, per tick
     val lidarCount: Int = 100,
     // amount of ticks that lidar particles should stay on the screen
-    val lidarDuration: Int = 100,
+    val lidarDurationBlock: Int = 100,
+    // amount of ticks that lidar particles on entities should stay on the screen
+    val lidarDurationEntity: Int = 20,
 ) : Config<LidarConfig>()
