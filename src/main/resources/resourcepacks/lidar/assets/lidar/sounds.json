@@ -1,0 +1,30 @@
+{
+  "music.game": {
+    "sounds": [
+      {
+        "name": "lidar:glass_temper",
+        "stream": true
+      },
+      {
+        "name": "lidar:acrylic",
+        "stream": true
+      },
+      {
+        "name": "lidar:deluge",
+        "stream": true
+      },
+      {
+        "name": "lidar:outrush",
+        "stream": true
+      },
+      {
+        "name": "lidar:static",
+        "stream": true
+      },
+      {
+        "name": "lidar:unease",
+        "stream": true
+      }
+    ]
+  }
+}
