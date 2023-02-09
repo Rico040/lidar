@@ -3,6 +3,7 @@ package me.jfenn.lidar
 import me.jfenn.lidar.Lidar.config
 import me.jfenn.lidar.data.DotParticle
 import me.jfenn.lidar.services.EntityModelService
+import me.jfenn.lidar.services.MusicService
 import me.jfenn.lidar.services.ParticleService
 import me.jfenn.lidar.services.RayCastService
 import net.fabricmc.api.ClientModInitializer
@@ -98,6 +99,8 @@ object LidarClient : ClientModInitializer {
             if (isActive != config.isActive) {
                 config = config.copy(isActive = isActive)
             }
+
+            MusicService.tick()
         })
     }
 

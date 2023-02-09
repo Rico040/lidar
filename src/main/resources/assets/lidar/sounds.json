@@ -1,0 +1,44 @@
+{
+  "music.glass_temper": {
+    "sounds": [{
+      "name": "lidar:glass_temper",
+      "volume": 0.2,
+      "stream": true
+    }]
+  },
+  "music.acrylic": {
+    "sounds": [{
+      "name": "lidar:acrylic",
+      "volume": 0.2,
+      "stream": true
+    }]
+  },
+  "music.deluge": {
+    "sounds": [{
+      "name": "lidar:deluge",
+      "volume": 0.2,
+      "stream": true
+    }]
+  },
+  "music.outrush": {
+    "sounds": [{
+      "name": "lidar:outrush",
+      "volume": 0.2,
+      "stream": true
+    }]
+  },
+  "music.static": {
+    "sounds": [{
+      "name": "lidar:static",
+      "volume": 0.2,
+      "stream": true
+    }]
+  },
+  "music.unease": {
+    "sounds": [{
+      "name": "lidar:unease",
+      "volume": 0.2,
+      "stream": true
+    }]
+  }
+}

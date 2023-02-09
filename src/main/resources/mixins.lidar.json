@@ -10,6 +10,7 @@
     "BlockEntityRenderDispatcherMixin",
     "BlockRenderManagerMixin",
     "EntityRendererMixin",
+    "MusicTrackerMixin",
     "WorldRendererMixin"
   ],
   "injectors": {
