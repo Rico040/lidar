@@ -17,12 +17,6 @@
         "adapter": "kotlin",
         "value": "me.jfenn.lidar.LidarClient"
       }
-    ],
-    "server": [
-      {
-        "adapter": "kotlin",
-        "value": "me.jfenn.lidar.LidarServer"
-      }
     ]
   },
   "depends": {
