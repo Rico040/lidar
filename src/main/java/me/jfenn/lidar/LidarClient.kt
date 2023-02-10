@@ -43,6 +43,7 @@ object LidarClient : ClientModInitializer {
                 if (entity !is LivingEntity || entity.isRemoved) continue
                 if (!config.entityParticles && !entity.isPlayer) continue
                 if (!entity.shouldRender(playerPos.distanceTo(entity.pos))) continue
+                if (entity.isSpectator) continue
 
                 // don't attempt collisions on excluded entity types
                 val entityType = Registry.ENTITY_TYPE.getId(entity.type).toString()
@@ -70,7 +71,7 @@ object LidarClient : ClientModInitializer {
                     entityHit?.takeIf {
                         // don't attempt raycasts on excluded entity types
                         val entityHitType = Registry.ENTITY_TYPE.getId(it.entity.type).toString()
-                        !config.entityRender.contains(entityHitType)
+                        !config.entityRender.contains(entityHitType) && !it.entity.isSpectator
                     }?.let { hit ->
                         EntityModelService.getCollisionPoint(hit.entity, hit.pos, projection)
                     }?.also { pos ->
