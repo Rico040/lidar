@@ -1,0 +1,17 @@
+{
+  "targets": [
+    "swap"
+  ],
+  "passes": [
+    {
+      "name": "lidar:bloom_x",
+      "intarget": "minecraft:main",
+      "outtarget": "swap"
+    },
+    {
+      "name": "lidar:bloom_y",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}

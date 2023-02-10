@@ -32,7 +32,6 @@ object MusicService {
 
         // use a function of time to determine which world tick to start the music on
         val x = (time % 3000) * sin(time / 1500f)
-        println("ticks remaining: $ticksRemaining, x: $x")
         if (x.toInt() != 0) return
 
         val musicId = musicList.random(Random(time))

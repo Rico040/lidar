@@ -1,5 +1,7 @@
 package me.jfenn.lidar
 
+import ladysnake.satin.api.event.ShaderEffectRenderCallback
+import ladysnake.satin.api.managed.ShaderEffectManager
 import me.jfenn.lidar.Lidar.config
 import me.jfenn.lidar.data.DotParticle
 import me.jfenn.lidar.services.EntityModelService
@@ -21,6 +23,8 @@ import net.minecraft.util.registry.Registry
 import org.lwjgl.glfw.GLFW
 
 object LidarClient : ClientModInitializer {
+
+    val shader = ShaderEffectManager.getInstance().manage(Identifier(MOD_ID, "shaders/post/particles.json"))
 
     override fun onInitializeClient() {
         println("$MOD_ID mod initialized (client)")
@@ -103,6 +107,11 @@ object LidarClient : ClientModInitializer {
 
             MusicService.tick()
         })
+
+        ShaderEffectRenderCallback.EVENT.register {
+            if (config.isActive)
+                shader.render(it)
+        }
     }
 
 }
