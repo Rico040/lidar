@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LidarConfig(
-    override val schemaVersion: Int = 2,
+    override val schemaVersion: Int = 3,
     val isActive: Boolean = true,
 
     // map of block id -> particle color code
@@ -12,8 +12,27 @@ data class LidarConfig(
         "default" to "#FFFFFF",
         "minecraft:water" to "#0000FF",
         "minecraft:seagrass" to "#0000FF",
+        "minecraft:kelp" to "#0000FF",
         "minecraft:kelp_plant" to "#0000FF",
         "minecraft:lava" to "#ff601c",
+        "minecraft:iron_ore" to "#d6ccb8",
+        "minecraft:deepslate_iron_ore" to "#d6ccb8",
+        "minecraft:coal_ore" to "#dedede",
+        "minecraft:deepslate_coal_ore" to "#dedede",
+        "minecraft:redstone_ore" to "#ffe3e3",
+        "minecraft:deepslate_redstone_ore" to "#ffe3e3",
+        "minecraft:diamond_ore" to "#e3f9fc",
+        "minecraft:deepslate_diamond_ore" to "#e3f9fc",
+        "minecraft:emerald_ore" to "#deffe2",
+        "minecraft:deepslate_emerald_ore" to "#deffe2",
+        "minecraft:lapis_ore" to "#e8e9fc",
+        "minecraft:deepslate_lapis_ore" to "#e8e9fc",
+        "minecraft:copper_ore" to "#faf0eb",
+        "minecraft:deepslate_copper_ore" to "#faf0eb",
+        "minecraft:gold_ore" to "#fff7d1",
+        "minecraft:deepslate_gold_ore" to "#fff7d1",
+        "minecraft:nether_quartz_ore" to "#e6e6e6",
+        "minecraft:nether_gold_ore" to "#fff7d1",
     ),
 
     // map of entity id -> particle color code
