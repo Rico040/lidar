@@ -71,4 +71,6 @@ data class LidarConfig(
     val lidarDurationBlock: Int = 100,
     // amount of ticks that lidar particles on entities should stay on the screen
     val lidarDurationEntity: Int = 20,
+    // whether the bloom shader effect should be rendered
+    val lidarBloom: Boolean = true,
 ) : Config<LidarConfig>()

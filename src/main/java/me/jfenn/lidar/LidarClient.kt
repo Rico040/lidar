@@ -109,7 +109,7 @@ object LidarClient : ClientModInitializer {
         })
 
         ShaderEffectRenderCallback.EVENT.register {
-            if (config.isActive)
+            if (config.isActive && config.lidarBloom)
                 shader.render(it)
         }
     }
