@@ -12,6 +12,7 @@ data class LidarConfig(
         "default" to "#FFFFFF",
         "minecraft:water" to "#0000FF",
         "minecraft:seagrass" to "#0000FF",
+        "minecraft:tall_seagrass" to "#0000FF",
         "minecraft:kelp" to "#0000FF",
         "minecraft:kelp_plant" to "#0000FF",
         "minecraft:lava" to "#ff601c",
