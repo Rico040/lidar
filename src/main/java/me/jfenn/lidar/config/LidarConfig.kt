@@ -55,18 +55,18 @@ data class LidarConfig(
 
     // whether particles should follow entities as they move
     val entityParticleFollow: Boolean = false,
-    // if enabled, particles follow entity models more accurately, at the cost of performance
-    val entityParticleFollowModel: Boolean = false,
+    // if enabled, particles project onto entity models more accurately, at the cost of performance
+    val entityParticleModel: Boolean = false,
     // if enabled, particles from other entities will render on the current player
     val entityParticlesOnSelf: Boolean = false,
-    // if enabled, any living entity also renders particles cast from its line of sight
-    val entityParticles: Boolean = true,
+    // amount of lidar projections created by non-player entities, per tick
+    val entityLidarCount: Int = 20,
 
     // block distance of raycast performed to project lidar particles
     val lidarDistance: Double = 10.0,
     // degrees/radius random spread of raycast projections
     val lidarSpread: Float = 30f,
-    // amount of lidar projections created per entity, per tick
+    // amount of lidar projections created for player entities, per tick
     val lidarCount: Int = 100,
     // amount of ticks that lidar particles should stay on the screen
     val lidarDurationBlock: Int = 100,

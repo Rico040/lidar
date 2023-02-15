@@ -7,8 +7,6 @@ import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.Entity
-import net.minecraft.entity.boss.dragon.EnderDragonEntity
-import net.minecraft.entity.boss.dragon.EnderDragonPart
 import net.minecraft.util.math.Vec3d
 
 object EntityModelService {
@@ -61,6 +59,20 @@ object EntityModelService {
         return hit?.takeIf {
             entity.boundingBox.contains(it) && it.y > entity.y
         }
+    }
+
+    fun getCollisionPoints(entity: Entity, projections: List<RayCastService.Projection>) {
+        val dispatcher = MinecraftClient.getInstance().entityRenderDispatcher ?: return
+
+        dispatcher.render(entity, entity.x, entity.y, entity.z, entity.yaw, 0f, MatrixStack(), TriInterceptorProvider { rect ->
+            for (projection in projections) with(projection) {
+                rect.findIntersection(origin, direction)?.let {
+                    if ((entityHitPos?.distanceTo(origin) ?: Double.MAX_VALUE) > it.distanceTo(origin) && entity.boundingBox.contains(it) && it.y > entity.y) {
+                        entityHitPos = it
+                    }
+                }
+            }
+        }, 0)
     }
 
 

@@ -25,7 +25,7 @@ import org.lwjgl.glfw.GLFW
 
 object LidarClient : ClientModInitializer {
 
-    val shader = ShaderEffectManager.getInstance().manage(Identifier(MOD_ID, "shaders/post/particles.json"))
+    private val shader = ShaderEffectManager.getInstance().manage(Identifier(MOD_ID, "shaders/post/particles.json"))
 
     override fun onInitializeClient() {
         println("$MOD_ID mod initialized (client)")
@@ -43,48 +43,71 @@ object LidarClient : ClientModInitializer {
             val world = client.world ?: return@StartTick
             val playerPos = client.player?.pos ?: return@StartTick
 
-            for (entity in world.entities) {
+            val entities = world.entities.asSequence().filter { entity ->
                 // skip entities outside of render distance
-                if (entity !is LivingEntity || entity.isRemoved) continue
-                if (!config.entityParticles && !entity.isPlayer) continue
-                if (!entity.shouldRender(playerPos.distanceTo(entity.pos))) continue
-                if (entity.isSpectator) continue
+                if (entity !is LivingEntity || entity.isRemoved) return@filter false
+                if (!entity.shouldRender(playerPos.distanceTo(entity.pos))) return@filter false
+                if (entity.isSpectator) return@filter false
 
                 // don't attempt collisions on excluded entity types
                 val entityType = Registry.ENTITY_TYPE.getId(entity.type).toString()
-                if (config.entityRender.contains(entityType)) continue
+                if (config.entityRender.contains(entityType)) return@filter false
 
                 // if the entity is in a block, only render one particle instead of casting projection
                 // (saves particle limit against fish/etc)
                 if ((!entity.isPlayer && entity.isSubmergedInWater) || entity.isInsideWall) {
                     val color = world.getBlockState(entity.blockPos)?.let {
                         ParticleService.getBlockColor(it)
-                    } ?: continue
+                    } ?: return@filter false
 
                     ParticleService.addParticle(world, entity.eyePos, DotParticle.Info(color))
-                    continue
+                    return@filter false
                 }
 
-                val projections = RayCastService.getEntityProjections(entity, config.lidarSpread, config.lidarCount)
-                for (projection in projections) {
-                    val (blockHit, entityHit) = RayCastService.raycastInDirection(entity, entity.eyePos, projection)
+                true
+            }
 
-                    // if entityHit is the current player, don't render the particle
-                    if (!config.entityParticlesOnSelf && entityHit?.entity?.id == client.player?.id)
-                        continue
+            val projectionsByEntity = entities.flatMap { entity ->
+                val count = if (entity.isPlayer) config.lidarCount else config.entityLidarCount
+                RayCastService.getEntityProjections(entity, config.lidarSpread, count)
+            }.groupBy { projection ->
+                projection.entityHit?.entity?.id
+            }
 
-                    entityHit?.takeIf {
-                        // don't attempt raycasts on excluded entity types
-                        val entityHitType = Registry.ENTITY_TYPE.getId(it.entity.type).toString()
-                        !config.entityRender.contains(entityHitType) && !it.entity.isSpectator
-                    }?.let { hit ->
+            for ((entityId, projections) in projectionsByEntity) {
+                // if entityHit is the current player, don't render the particle
+                if (!config.entityParticlesOnSelf && entityId == client.player?.id)
+                    continue
+
+                entityId?.let {
+                    world.getEntityById(entityId)
+                }?.takeIf {
+                    // don't attempt raycasts on excluded entity types
+                    val entityHitType = Registry.ENTITY_TYPE.getId(it.type).toString()
+                    !config.entityRender.contains(entityHitType) && !it.isSpectator
+                }?.let {
+                    // if entities should project onto the entity model...
+                    if (config.entityParticleModel) {
+                        // attempt to render the entity model
                         tryOrNull {
-                            EntityModelService.getCollisionPoint(hit.entity, hit.pos, projection)
+                            EntityModelService.getCollisionPoints(it, projections)
                         }
-                    }?.also { pos ->
-                        ParticleService.addEntityHit(entityHit, pos)
-                    } ?: blockHit?.let { hit ->
-                        ParticleService.addBlockHit(hit)
+                    } else {
+                        // use the hitbox location as an entity intersection
+                        for (projection in projections) {
+                            projection.entityHitPos = projection.entityHit?.pos
+                        }
+                    }
+                }
+
+                // create the projected particles
+                for (projection in projections) {
+                    projection.entityHit?.let { entityHit ->
+                        projection.entityHitPos?.let { pos ->
+                            ParticleService.addEntityHit(entityHit, pos)
+                        }
+                    } ?: projection.blockHit?.let {
+                        ParticleService.addBlockHit(it)
                     }
                 }
             }
