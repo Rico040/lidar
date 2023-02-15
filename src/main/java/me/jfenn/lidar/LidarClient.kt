@@ -8,6 +8,7 @@ import me.jfenn.lidar.services.EntityModelService
 import me.jfenn.lidar.services.MusicService
 import me.jfenn.lidar.services.ParticleService
 import me.jfenn.lidar.services.RayCastService
+import me.jfenn.lidar.utils.tryOrNull
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
@@ -77,7 +78,9 @@ object LidarClient : ClientModInitializer {
                         val entityHitType = Registry.ENTITY_TYPE.getId(it.entity.type).toString()
                         !config.entityRender.contains(entityHitType) && !it.entity.isSpectator
                     }?.let { hit ->
-                        EntityModelService.getCollisionPoint(hit.entity, hit.pos, projection)
+                        tryOrNull {
+                            EntityModelService.getCollisionPoint(hit.entity, hit.pos, projection)
+                        }
                     }?.also { pos ->
                         ParticleService.addEntityHit(entityHit, pos)
                     } ?: blockHit?.let { hit ->
