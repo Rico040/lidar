@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LidarConfig(
-    override val schemaVersion: Int = 3,
+    override val schemaVersion: Int = 4,
     val isActive: Boolean = true,
 
     // map of block id -> particle color code
@@ -56,7 +56,7 @@ data class LidarConfig(
     // whether particles should follow entities as they move
     val entityParticleFollow: Boolean = false,
     // if enabled, particles project onto entity models more accurately, at the cost of performance
-    val entityParticleModel: Boolean = false,
+    val entityParticleModel: Boolean = true,
     // if enabled, particles from other entities will render on the current player
     val entityParticlesOnSelf: Boolean = false,
     // amount of lidar projections created by non-player entities, per tick

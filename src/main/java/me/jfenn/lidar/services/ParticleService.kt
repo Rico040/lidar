@@ -2,6 +2,7 @@ package me.jfenn.lidar.services
 
 import me.jfenn.lidar.Lidar
 import me.jfenn.lidar.data.DotParticle
+import me.jfenn.lidar.data.DotParticle.Companion.toBits
 import net.minecraft.block.BlockState
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.world.ClientWorld
@@ -47,7 +48,7 @@ object ParticleService {
             (hit.blockPos.z + offset.z.coerceIn(OFFSET_MIN, OFFSET_MAX)),
         )
 
-        addParticle(world, pos, DotParticle.Info(color))
+        addParticle(world, pos, color)
     }
 
     fun getEntityColor(entity: Entity): Int? {
@@ -75,21 +76,23 @@ object ParticleService {
         addParticle(
             world = world,
             pos = hitPos,
-            info = DotParticle.Info(
-                color = color,
-                entityId = entity.id,
-                entityOffset = offset,
-            ),
+            color = color,
+            entityId = entity.id,
+            entityOffset = offset,
         )
     }
 
-    fun addParticle(world: ClientWorld, pos: Vec3d, info: DotParticle.Info) {
-        val (i, j, k) = info.encode()
-
+    fun addParticle(world: ClientWorld, pos: Vec3d, color: Int, entityId: Int? = null, entityOffset: Vec3d? = null) {
         world.addImportantParticle(
             DotParticle.DOT,
             pos.x, pos.y, pos.z,
-            i, j, k,
+            Double.fromBits(color.toLong()),
+            Double.fromBits(
+                entityId?.toLong()?.shl(32) ?: 0L
+            ),
+            Double.fromBits(
+                entityOffset?.toBits() ?: 0L
+            )
         )
     }
 

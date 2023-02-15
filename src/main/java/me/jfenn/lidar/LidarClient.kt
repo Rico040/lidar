@@ -60,7 +60,7 @@ object LidarClient : ClientModInitializer {
                         ParticleService.getBlockColor(it)
                     } ?: return@filter false
 
-                    ParticleService.addParticle(world, entity.eyePos, DotParticle.Info(color))
+                    ParticleService.addParticle(world, entity.eyePos, color)
                     return@filter false
                 }
 
