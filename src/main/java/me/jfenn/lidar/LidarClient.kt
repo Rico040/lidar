@@ -1,5 +1,6 @@
 package me.jfenn.lidar
 
+import ladysnake.satin.api.event.PostWorldRenderCallback
 import ladysnake.satin.api.event.ShaderEffectRenderCallback
 import ladysnake.satin.api.managed.ShaderEffectManager
 import me.jfenn.lidar.Lidar.config
@@ -134,9 +135,9 @@ object LidarClient : ClientModInitializer {
             MusicService.tick()
         })
 
-        ShaderEffectRenderCallback.EVENT.register {
+        PostWorldRenderCallback.EVENT.register { _, tickDelta, _ ->
             if (config.isActive && config.lidarBloom)
-                shader.render(it)
+                shader.render(tickDelta)
         }
     }
 
