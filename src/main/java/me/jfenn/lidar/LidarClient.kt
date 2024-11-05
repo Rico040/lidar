@@ -1,8 +1,5 @@
 package me.jfenn.lidar
 
-import ladysnake.satin.api.event.PostWorldRenderCallback
-import ladysnake.satin.api.event.ShaderEffectRenderCallback
-import ladysnake.satin.api.managed.ShaderEffectManager
 import me.jfenn.lidar.Lidar.config
 import me.jfenn.lidar.data.DotParticle
 import me.jfenn.lidar.services.EntityModelService
@@ -18,21 +15,23 @@ import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener
 import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.util.InputUtil
 import net.minecraft.entity.LivingEntity
+import net.minecraft.registry.Registries
 import net.minecraft.resource.ResourceManager
 import net.minecraft.resource.ResourceType
 import net.minecraft.util.Identifier
-import net.minecraft.util.registry.Registry
+import org.ladysnake.satin.api.event.PostWorldRenderCallback
+import org.ladysnake.satin.api.managed.ShaderEffectManager
 import org.lwjgl.glfw.GLFW
 
 object LidarClient : ClientModInitializer {
 
-    private val shader = ShaderEffectManager.getInstance().manage(Identifier(MOD_ID, "shaders/post/particles.json"))
+    private val shader = ShaderEffectManager.getInstance().manage(Identifier.of(MOD_ID, "shaders/post/particles.json"))
 
     override fun onInitializeClient() {
         println("$MOD_ID mod initialized (client)")
 
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(object : SimpleSynchronousResourceReloadListener {
-            override fun getFabricId() = Identifier("$MOD_ID:$MOD_ID")
+            override fun getFabricId() = Identifier.of("$MOD_ID:$MOD_ID")
             override fun reload(manager: ResourceManager) {
                 Lidar.reload()
             }
@@ -51,7 +50,7 @@ object LidarClient : ClientModInitializer {
                 if (entity.isSpectator) return@filter false
 
                 // don't attempt collisions on excluded entity types
-                val entityType = Registry.ENTITY_TYPE.getId(entity.type).toString()
+                val entityType = Registries.ENTITY_TYPE.getId(entity.type).toString()
                 if (config.entityRender.contains(entityType)) return@filter false
 
                 // if the entity is in a block, only render one particle instead of casting projection
@@ -84,7 +83,7 @@ object LidarClient : ClientModInitializer {
                     world.getEntityById(entityId)
                 }?.takeIf {
                     // don't attempt raycasts on excluded entity types
-                    val entityHitType = Registry.ENTITY_TYPE.getId(it.type).toString()
+                    val entityHitType = Registries.ENTITY_TYPE.getId(it.type).toString()
                     !config.entityRender.contains(entityHitType) && !it.isSpectator
                 }?.let {
                     // if entities should project onto the entity model...
@@ -135,7 +134,7 @@ object LidarClient : ClientModInitializer {
             MusicService.tick()
         })
 
-        PostWorldRenderCallback.EVENT.register { _, tickDelta, _ ->
+        PostWorldRenderCallback.EVENT.register { _, tickDelta ->
             if (config.isActive && config.lidarBloom)
                 shader.render(tickDelta)
         }

@@ -2,13 +2,10 @@ package me.jfenn.lidar.services
 
 import me.jfenn.lidar.utils.client
 import net.minecraft.client.sound.PositionedSoundInstance
-import net.minecraft.client.sound.Sound
-import net.minecraft.sound.MusicSound
 import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Identifier
 import kotlin.math.sin
 import kotlin.random.Random
-import kotlin.random.nextInt
 
 object MusicService {
 
@@ -35,7 +32,9 @@ object MusicService {
         if (x.toInt() != 0) return
 
         val musicId = musicList.random(Random(time))
-        val music = PositionedSoundInstance.music(SoundEvent(Identifier("lidar", "music.$musicId")))
+        val music = PositionedSoundInstance.music(
+            SoundEvent.of(Identifier.of("lidar", "music.$musicId"))
+        )
         client.soundManager.play(music)
 
         // wait a minimum of ~2min before the next song

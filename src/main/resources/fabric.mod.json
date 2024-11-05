@@ -20,8 +20,8 @@
     ]
   },
   "depends": {
-    "fabricloader": ">=0.7.2",
-    "minecraft": ">=1.19-"
+    "fabricloader": ">=0.16.9",
+    "minecraft": ">=1.21-"
   },
   "contact": {
     "homepage": "https://minecraft.horrific.dev/",
@@ -29,7 +29,8 @@
     "issues": "https://gitlab.com/horrific-tweaks/lidar/issues/"
   },
   "authors": [
-    "fennifith"
+    "fennifith",
+    "Rico040"
   ],
   "description": "Modifies the Minecraft renderer to display lidar dots of a world",
   "mixins": [

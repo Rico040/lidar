@@ -12,7 +12,7 @@ import net.minecraft.entity.passive.PassiveEntity
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.EntityHitResult
 import net.minecraft.util.math.Vec3d
-import net.minecraft.util.registry.Registry
+import net.minecraft.registry.Registries
 
 object ParticleService {
 
@@ -26,7 +26,7 @@ object ParticleService {
     fun getBlockColor(blockState: BlockState): Int? {
         if (blockState.isAir) return null
 
-        val id = Registry.BLOCK.getId(blockState.block).toString()
+        val id = Registries.BLOCK.getId(blockState.block).toString()
         val colorString = Lidar.config.blockColorMap.let {
             it[id] ?: it["default"]
         }
@@ -52,7 +52,7 @@ object ParticleService {
     }
 
     fun getEntityColor(entity: Entity): Int? {
-        val id = Registry.ENTITY_TYPE.getId(entity.type).toString()
+        val id = Registries.ENTITY_TYPE.getId(entity.type).toString()
         val type = when (entity) {
             is HostileEntity -> "hostile"
             is PassiveEntity -> "passive"

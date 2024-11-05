@@ -51,7 +51,7 @@ object RayCastService {
             projection.origin,
             vec3d3,
             box,
-            { entityx: Entity -> !entityx.isSpectator && entityx.collides() },
+            { entityx: Entity -> !entityx.isSpectator && entityx.canHit() },
             blockDistanceSq
         )?.takeIf {
             // only return the entity if entity hit is closer than block

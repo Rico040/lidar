@@ -17,8 +17,8 @@ object EntityModelService {
 
         private val points = mutableListOf<Vec3d>()
 
-        override fun vertex(x: Double, y: Double, z: Double): VertexConsumer = apply {
-            points.add(Vec3d(x, y, z))
+        override fun vertex(x: Float, y: Float, z: Float): VertexConsumer? = apply {
+            points.add(Vec3d(x.toDouble(), y.toDouble(), z.toDouble()))
 
             if (points.size >= 4) { // every 4 vectors = 1 quad to return
                 callback(Rect3d(points.removeFirst(), points.removeFirst(), points.removeFirst(), points.removeFirst()))
@@ -30,9 +30,9 @@ object EntityModelService {
         override fun overlay(u: Int, v: Int): VertexConsumer = this
         override fun light(u: Int, v: Int): VertexConsumer = this
         override fun normal(x: Float, y: Float, z: Float): VertexConsumer = this
-        override fun next() {}
-        override fun fixedColor(red: Int, green: Int, blue: Int, alpha: Int) {}
-        override fun unfixColor() {}
+//        override fun next() {}
+//        override fun fixedColor(red: Int, green: Int, blue: Int, alpha: Int) {}
+//        override fun unfixColor() {}
     }
 
     class TriInterceptorProvider(

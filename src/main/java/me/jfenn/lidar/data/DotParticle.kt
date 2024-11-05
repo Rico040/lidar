@@ -6,11 +6,12 @@ import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes
 import net.minecraft.client.particle.*
 import net.minecraft.client.world.ClientWorld
-import net.minecraft.particle.DefaultParticleType
+import net.minecraft.particle.SimpleParticleType
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
-import net.minecraft.util.registry.Registry
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 import java.lang.ref.WeakReference
 
 class DotParticle(
@@ -33,7 +34,7 @@ class DotParticle(
         vec3dFromBits(it)
     }
 
-    private val blockPos = BlockPos(x, y, z)
+    private val blockPos = BlockPos(x.toInt(), y.toInt(), z.toInt())
     private val blockIdentity = run {
         world.getBlockState(blockPos)
     }.let {
@@ -97,9 +98,9 @@ class DotParticle(
         return j or (k shl 16)
     }
 
-    class Factory(private val spriteProvider: SpriteProvider) : ParticleFactory<DefaultParticleType?> {
+    class Factory(private val spriteProvider: SpriteProvider) : ParticleFactory<SimpleParticleType?> {
         override fun createParticle(
-            defaultParticleType: DefaultParticleType?,
+            defaultParticleType: SimpleParticleType?,
             clientWorld: ClientWorld,
             d: Double,
             e: Double,
@@ -116,9 +117,9 @@ class DotParticle(
 
     companion object {
         val DOT = FabricParticleTypes.simple()!!
-        val ID = Identifier(MOD_ID, "dot")
+        val ID = Identifier.of(MOD_ID, "dot")
 
-        fun register() = Registry.register(Registry.PARTICLE_TYPE, ID, DOT)
+        fun register() = Registry.register(Registries.PARTICLE_TYPE, ID, DOT)
 
         fun registerClient() {
             ParticleFactoryRegistry.getInstance().register(DOT) { it -> Factory(it) }
