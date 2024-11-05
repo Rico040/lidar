@@ -39,13 +39,13 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
-	include "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
+//	include "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
 	implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
 
 	modImplementation "org.ladysnake:satin:${satin_version}"
-	include "org.ladysnake:satin:${satin_version}"
+//	include "org.ladysnake:satin:${satin_version}"
 
 	testImplementation "org.junit.jupiter:junit-jupiter:5.8.2"
 }
